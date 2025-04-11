@@ -4,10 +4,24 @@ import re
 from markdown_blocks import markdown_to_html_node
 
 
-def generate_page(from_path, template_path, dest_path):
-    print(f" * {from_path} {template_path} -> {dest_path}")
+def generate_html_pages_recursive(source_dir_path, template_path, destination_dir_path):
+    for entry in os.listdir(source_dir_path):
+        source_path = os.path.join(source_dir_path, entry)
+        destination_path = os.path.join(destination_dir_path, entry)
 
-    with open(from_path, "r", encoding="utf-8") as f:
+        if os.path.isfile(source_path):
+            base, _ = os.path.splitext(destination_path)
+            destination_path = base + ".html"
+            generate_single_page(source_path, template_path, destination_path)
+
+        elif os.path.isdir(source_path):
+            generate_html_pages_recursive(source_path, template_path, destination_path)
+
+
+def generate_single_page(source_markdown_path, template_path, destination_html_path):
+    print(f" * {source_markdown_path} {template_path} -> {destination_html_path}")
+
+    with open(source_markdown_path, "r", encoding="utf-8") as f:
         markdown = f.read()
 
     with open(template_path, "r", encoding="utf-8") as f:
@@ -18,11 +32,11 @@ def generate_page(from_path, template_path, dest_path):
 
     output = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
 
-    dest_dir = os.path.dirname(dest_path)
-    if dest_dir:
-        os.makedirs(dest_dir, exist_ok=True)
+    destination_dir = os.path.dirname(destination_html_path)
+    if destination_dir:
+        os.makedirs(destination_dir, exist_ok=True)
 
-    with open(dest_path, "w", encoding="utf-8") as f:
+    with open(destination_html_path, "w", encoding="utf-8") as f:
         f.write(output)
 
 
