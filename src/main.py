@@ -1,21 +1,23 @@
-from textnode import TextNode, TextType
-from htmlnode import HTMLNode
+import os
+import shutil
+
+from copystatic import copy_files_recursive
+
+dir_path_static = "./static"
+dir_path_public = "./public"
 
 
 def main():
-    node = TextNode("This is some alt text", TextType.IMAGE, "https://www.google.com")
-    print(node)
-    node = HTMLNode(
-        "a",
-        "this is a link",
-        None,
-        {
-            "href": "https://www.google.com",
-            "target": "_blank",
-        },
-    )
-    print(node)
-    print(node.props_to_html())
+    print(f'Deleting "{dir_path_public}"...')
+    if os.path.exists(dir_path_public):
+        if os.path.isdir(dir_path_public):
+            shutil.rmtree(dir_path_public)
+        elif os.path.isfile(dir_path_public):
+            os.remove(dir_path_public)
+
+    print(f'Copying files from "{dir_path_static}" to "{dir_path_public}"...')
+    copy_files_recursive(dir_path_static, dir_path_public)
 
 
-main()
+if __name__ == "__main__":
+    main()
