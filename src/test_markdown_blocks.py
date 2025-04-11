@@ -1,10 +1,10 @@
 import unittest
 
 from markdown_blocks import (
-    markdown_to_html_node,
-    markdown_to_blocks,
-    block_to_block_type,
     BlockType,
+    block_to_block_type,
+    markdown_to_blocks,
+    markdown_to_html_node,
 )
 
 
