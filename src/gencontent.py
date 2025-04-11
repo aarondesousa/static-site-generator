@@ -4,7 +4,9 @@ import re
 from markdown_blocks import markdown_to_html_node
 
 
-def generate_html_pages_recursive(source_dir_path, template_path, destination_dir_path):
+def generate_html_pages_recursive(
+    source_dir_path, template_path, destination_dir_path, basepath
+):
     for entry in os.listdir(source_dir_path):
         source_path = os.path.join(source_dir_path, entry)
         destination_path = os.path.join(destination_dir_path, entry)
@@ -12,13 +14,17 @@ def generate_html_pages_recursive(source_dir_path, template_path, destination_di
         if os.path.isfile(source_path):
             base, _ = os.path.splitext(destination_path)
             destination_path = base + ".html"
-            generate_single_page(source_path, template_path, destination_path)
+            generate_single_page(source_path, template_path, destination_path, basepath)
 
         elif os.path.isdir(source_path):
-            generate_html_pages_recursive(source_path, template_path, destination_path)
+            generate_html_pages_recursive(
+                source_path, template_path, destination_path, basepath
+            )
 
 
-def generate_single_page(source_markdown_path, template_path, destination_html_path):
+def generate_single_page(
+    source_markdown_path, template_path, destination_html_path, basepath
+):
     print(f" * {source_markdown_path} {template_path} -> {destination_html_path}")
 
     with open(source_markdown_path, "r", encoding="utf-8") as f:
@@ -30,7 +36,12 @@ def generate_single_page(source_markdown_path, template_path, destination_html_p
     html = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
 
-    output = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    output = (
+        template.replace("{{ Title }}", title)
+        .replace("{{ Content }}", html)
+        .replace('href="/', f'href="{basepath}')
+        .replace('src="/', f'src="{basepath}')
+    )
 
     destination_dir = os.path.dirname(destination_html_path)
     if destination_dir:

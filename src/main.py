@@ -7,9 +7,12 @@ from gencontent import generate_html_pages_recursive
 
 
 def main():
+    args = sys.argv
+    basepath = args[1] if len(args) >= 2 else "/"
+
     source_static_dir = os.path.join(".", "static")
     source_content_dir = os.path.join(".", "content")
-    destination_public_dir = os.path.join(".", "public")
+    destination_public_dir = os.path.join(".", "docs")
     template_file_path = os.path.join(".", "template.html")
 
     print(f'Deleting "{destination_public_dir}"...')
@@ -26,7 +29,7 @@ def main():
 
     print("Generating HTML pages...")
     generate_html_pages_recursive(
-        source_content_dir, template_file_path, destination_public_dir
+        source_content_dir, template_file_path, destination_public_dir, basepath
     )
 
 
