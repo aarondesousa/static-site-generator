@@ -54,68 +54,76 @@ def block_to_block_type(block):
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
-    block_nodes = []
+    children = []
     for block in blocks:
-        block_type = block_to_block_type(block)
-        match block_type:
-            case BlockType.PARAGRAPH:
-                block_nodes.append(ParentNode("p", text_to_children(block)))
-                # print(f"block nodes: {block_nodes}")
-            case BlockType.HEADING:
-                match = re.match(r"^(#{1,6})[ \t]+(.*)", block)
-                if match:
-                    hashes, content = match.groups()
-                    tag = f"h{len(hashes)}"
-                    block_nodes.append(ParentNode(tag, text_to_children(content)))
-            case BlockType.CODE:
-                text_node = TextNode(block[4:-3], TextType.TEXT)
-                # print(f"text node: {repr(text_node)}")
-                block_nodes.append(
-                    ParentNode(
-                        "pre", [ParentNode("code", [text_node_to_html_node(text_node)])]
-                    )
-                )
-            case BlockType.QUOTE:
-                lines = block.split("\n")
-                child_nodes = []
-                first = True
-                for line in lines:
-                    if first:
-                        child_nodes.extend(text_to_children(line[2:]))
-                        first = False
-                    else:
-                        child_nodes.extend(text_to_children(line[1:]))
-                block_nodes.append(ParentNode("blockquote", child_nodes))
-            case BlockType.ORDERED_LIST:
-                lines = block.split("\n")
-                child_nodes = []
-                for line in lines:
-                    child_nodes.append(ParentNode("li", text_to_children(line[3:])))
-                block_nodes.append(ParentNode("ol", child_nodes))
-            case BlockType.UNORDERED_LIST:
-                lines = block.split("\n")
-                child_nodes = []
-                for line in lines:
-                    child_nodes.append(ParentNode("li", text_to_children(line[2:])))
-                block_nodes.append(ParentNode("ul", child_nodes))
-            case _:
-                raise ValueError(f"invalid markdown block: {block}")
+        html_node = block_to_html_node(block)
+        children.append(html_node)
+    return ParentNode("div", children)
 
-    # parent_node = ParentNode("div", block_nodes)
-    # print(f"parent node: {parent_node}")
-    # print(f"html: {repr(parent_node.to_html())}")
-    return ParentNode("div", block_nodes)
+
+def block_to_html_node(block):
+    block_type = block_to_block_type(block)
+    match block_type:
+        case BlockType.PARAGRAPH:
+            return paragraph_to_html_node(block)
+        case BlockType.HEADING:
+            return heading_to_html_node(block)
+        case BlockType.CODE:
+            return code_to_html_node(block)
+        case BlockType.QUOTE:
+            return quote_to_html_node(block)
+        case BlockType.ORDERED_LIST:
+            return ordered_list_to_html_node(block)
+        case BlockType.UNORDERED_LIST:
+            return unordered_list_to_html_node(block)
+        case _:
+            raise ValueError(f"invalid markdown block: {block}")
 
 
 def text_to_children(text):
-    # print(f"text: {text}")
-    new_text = text.replace("\n", " ")
-    # print(f"text-after: {new_text}")
-    text_nodes = text_to_textnodes(new_text)
-    # print(f"text_nodes: {text_nodes}")
+    text_nodes = text_to_textnodes(text)
     html_nodes = []
     for text_node in text_nodes:
-        # html_node = text_node_to_html_node(text_node)
-        # print(f"html node: {html_node}")
         html_nodes.append(text_node_to_html_node(text_node))
     return html_nodes
+
+
+def paragraph_to_html_node(block):
+    text = block.replace("\n", " ")
+    return ParentNode("p", text_to_children(text))
+
+
+def heading_to_html_node(block):
+    match = re.match(r"^(#{1,6})[ \t]+(.*)", block)
+    if not match:
+        raise ValueError(f"invalid heading block: {block}")
+    hashes, content = match.groups()
+    tag = f"h{len(hashes)}"
+    return ParentNode(tag, text_to_children(content))
+
+
+def code_to_html_node(block):
+    text_node = TextNode(block[4:-3], TextType.TEXT)
+    return ParentNode("pre", [ParentNode("code", [text_node_to_html_node(text_node)])])
+
+
+def quote_to_html_node(block):
+    matches = re.findall(r"^>[ \t]*(.*)", block, re.MULTILINE)
+    text = " ".join(matches)
+    return ParentNode("blockquote", text_to_children(text))
+
+
+def ordered_list_to_html_node(block):
+    lines = block.split("\n")
+    child_nodes = []
+    for line in lines:
+        child_nodes.append(ParentNode("li", text_to_children(line[3:])))
+    return ParentNode("ol", child_nodes)
+
+
+def unordered_list_to_html_node(block):
+    lines = block.split("\n")
+    child_nodes = []
+    for line in lines:
+        child_nodes.append(ParentNode("li", text_to_children(line[2:])))
+    return ParentNode("ul", child_nodes)
