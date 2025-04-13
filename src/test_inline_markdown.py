@@ -15,7 +15,7 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delim_bold(self):
         node = TextNode("This is text with a **bolded** word", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This is text with a ", TextType.TEXT),
@@ -27,7 +27,7 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delim_bold_double(self):
         node = TextNode("This is text with **two** bolded **words**", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This is text with ", TextType.TEXT),
@@ -42,7 +42,7 @@ class TestInlineMarkdown(unittest.TestCase):
             "**This** **is** text with consecutive **bolded** **words**", TextType.TEXT
         )
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This", TextType.BOLD),
@@ -58,7 +58,7 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delim_bold_multiword(self):
         node = TextNode("This is text **with two** bolded **words**", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This is text ", TextType.TEXT),
@@ -71,7 +71,7 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delim_code(self):
         node = TextNode("This is text with a `code block` word", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This is text with a ", TextType.TEXT),
@@ -87,7 +87,7 @@ class TestInlineMarkdown(unittest.TestCase):
         )
         new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
         new_nodes = split_nodes_delimiter(new_nodes, "`", TextType.CODE)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This is text with some ", TextType.TEXT),
@@ -102,7 +102,7 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delim_italic(self):
         node = TextNode("This is text with an _italicized_ word", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
-        self.assertEqual(
+        self.assertListEqual(
             new_nodes,
             [
                 TextNode("This is text with an ", TextType.TEXT),
@@ -191,7 +191,7 @@ class TestInlineMarkdown(unittest.TestCase):
         nodes = text_to_textnodes(
             "This is **text** with an _italic_ word and a `code block` and a ![python image](https://imgur.com/zjjcJKZ) and a [link](https://www.example.com)"
         )
-        self.assertEqual(
+        self.assertListEqual(
             nodes,
             [
                 TextNode("This is ", TextType.TEXT),
